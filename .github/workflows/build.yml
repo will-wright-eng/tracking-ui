@@ -43,9 +43,9 @@ jobs:
     #   run: |
     #     make check-codestyle
 
-    - name: Run tests
-      run: |
-        make test
+    # - name: Run tests
+    #   run: |
+    #     make test
 
     # - name: Run safety checks
     #   run: |
