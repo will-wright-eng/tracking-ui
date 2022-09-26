@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./deploy/Dockerfile
+    image: tracking_ui:${TRACKING_UI_VERSION:-latest}
+    restart: always
+    env_file:
+    - .env
+    environment:
+      TRACKING_UI_HOST: 0.0.0.0
