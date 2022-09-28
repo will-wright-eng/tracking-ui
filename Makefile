@@ -35,30 +35,27 @@ dc-test: ## run tests from docker compose
 dc-test-kill: ## kill docker compose tests
 	docker-compose -f deploy/docker-compose.yml --project-directory . down
 
+docker-build: ## build docker image
+	@echo Building docker $(IMAGE):$(VERSION) ...
+	docker build \
+		-t $(IMAGE):$(VERSION) . \
+		-f ./deploy/Dockerfile --no-cache
 
-install: ## old list
+install: ## -- old list --
 	poetry lock -n && poetry export --without-hashes > requirements.txt
 	poetry install -n
 	#poetry run mypy --install-types --non-interactive ./
 
-pre-commit-install: ## old list
+pre-commit-install: ## -- old list --
 	poetry run pre-commit install
 
-codestyle: ## old list
+codestyle: ## -- old list --
 	poetry run pyupgrade --exit-zero-even-if-changed --py39-plus **/*.py
 	poetry run isort --settings-path pyproject.toml ./
 # 	poetry run black --config pyproject.toml ./
 
-# Example: make docker-build VERSION=latest
-# Example: make docker-build IMAGE=some_name VERSION=0.1.0
-docker-build: ## old list
-	@echo Building docker $(IMAGE):$(VERSION) ...
-	docker build \
-		-t $(IMAGE):$(VERSION) . \
-		-f ./docker/Dockerfile --no-cache
-
 # Example: make docker-remove VERSION=latest
 # Example: make docker-remove IMAGE=some_name VERSION=0.1.0
-docker-remove: ## old list
+docker-remove: ## -- old list --
 	@echo Removing docker $(IMAGE):$(VERSION) ...
 	docker rmi -f $(IMAGE):$(VERSION)

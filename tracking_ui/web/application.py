@@ -10,9 +10,7 @@ from tracking_ui.web.lifetime import register_shutdown_event, register_startup_e
 def get_app() -> FastAPI:
     """
     Get FastAPI application.
-
     This is the main constructor of an application.
-
     :return: application.
     """
     app = FastAPI(
@@ -30,6 +28,6 @@ def get_app() -> FastAPI:
     register_shutdown_event(app)
 
     # Main router for the API.
-    app.include_router(router=api_router, prefix="/api")
+    app.include_router(router=api_router, prefix="/v1")
 
     return app
