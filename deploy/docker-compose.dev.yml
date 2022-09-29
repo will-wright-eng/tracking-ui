@@ -8,6 +8,8 @@ services:
     volumes:
       # Adds current directory as volume.
     - .:/app/src/
+    - '${HOME}/.aws/:/root/.aws/'
+
     environment:
       # Enables autoreload.
       TRACKING_UI_RELOAD: "True"
