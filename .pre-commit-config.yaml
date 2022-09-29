@@ -33,7 +33,7 @@ repos:
 
   - id: isort
     name: isort
-    entry: poetry run isort --ls --only-sections
+    entry: poetry run isort --ls
     language: system
     types: [python]
 

@@ -1,6 +1,6 @@
-import configparser
-import pathlib
 import time
+import pathlib
+import configparser
 
 import boto3
 
@@ -44,22 +44,8 @@ class athenaMgmt:
 
     def check_status(self, execution_id):
         """return: query_status"""
-        # state = "RUNNING"
-        # max_execution = 5
-        # while max_execution > 0 and state in ["RUNNING", "QUEUED"]:
-        #     max_execution -= 1
         response = self.client.get_query_execution(QueryExecutionId=execution_id)
         return response
-        #     if (
-        #         "QueryExecution" in response
-        #         and "Status" in response["QueryExecution"]
-        #         and "State" in response["QueryExecution"]["Status"]
-        #     ):
-        #         state = response["QueryExecution"]["Status"]["State"]
-        #         if state == "SUCCEEDED":
-        #             return True
-        #     time.sleep(30)
-        # return False
 
     def create_database(self):
         """return: execution_id"""
