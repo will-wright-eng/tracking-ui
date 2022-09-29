@@ -43,3 +43,13 @@ def form_post(request: Request, num: int = Form(...)):
         "form.html",
         context={"request": request, "result": result},
     )
+
+
+@router.get("/athena-test")
+def athena_test(request: Request):
+    # result = "Type a number"
+    # do struff to get athena data
+    return templates.TemplateResponse(
+        "form.html",
+        context={"request": request, "result": result},
+    )
