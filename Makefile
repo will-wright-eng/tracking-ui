@@ -41,7 +41,7 @@ docker-build: ## build docker image
 		-t $(IMAGE):$(VERSION) . \
 		-f ./deploy/Dockerfile --no-cache
 
-install: ## -- old list --
+poetry-set: ## updates lockfile, exports requirements.txt, and reinstalls
 	poetry lock -n && poetry export --without-hashes > requirements.txt
 	poetry install -n
 	#poetry run mypy --install-types --non-interactive ./
