@@ -4,6 +4,8 @@ from pathlib import Path
 from fastapi import APIRouter, Form, Request
 from fastapi.templating import Jinja2Templates
 
+from tracking_ui.services.athena.athena import athenaMgmt
+
 BASE_PATH = Path(__file__).resolve().parents[3]
 TEMPLATE_PATH = os.path.join(BASE_PATH, "templates")
 templates = Jinja2Templates(directory=TEMPLATE_PATH)
