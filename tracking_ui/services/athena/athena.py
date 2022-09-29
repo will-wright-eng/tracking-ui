@@ -1,11 +1,24 @@
+import configparser
+import pathlib
 import time
 
 import boto3
 
+# def get_default_region() -> str:
+#     config_file_path = pathlib.Path.home() / ".aws" / "config"
+#     if os.path.isfile(config_file_path):
+#         config = configparser.ConfigParser()
+#         config.read(config_file_path)
+#         return config["default"]["region"]
+#     else:
+#         region = "us-west-1"
+#         return region
+
 
 class athenaMgmt:
     def __init__(self):
-        self.client = boto3.client("athena")
+        # self.client = boto3.client(service_name="athena", region_name=get_default_region())
+        self.client = boto3.client(service_name="athena", region_name="us-west-1")
         self.database_name = "athena_tutorial"
         self.results_output_location = "s3://wwtestbucket/athena_test/queries/"
         self.table_ddl = "funding_data.ddl"
@@ -28,6 +41,25 @@ class athenaMgmt:
                     return True
             time.sleep(30)
         return False
+
+    def check_status(self, execution_id):
+        """return: query_status"""
+        # state = "RUNNING"
+        # max_execution = 5
+        # while max_execution > 0 and state in ["RUNNING", "QUEUED"]:
+        #     max_execution -= 1
+        response = self.client.get_query_execution(QueryExecutionId=execution_id)
+        return response
+        #     if (
+        #         "QueryExecution" in response
+        #         and "Status" in response["QueryExecution"]
+        #         and "State" in response["QueryExecution"]["Status"]
+        #     ):
+        #         state = response["QueryExecution"]["Status"]["State"]
+        #         if state == "SUCCEEDED":
+        #             return True
+        #     time.sleep(30)
+        # return False
 
     def create_database(self):
         """return: execution_id"""
