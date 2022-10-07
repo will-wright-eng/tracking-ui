@@ -2,9 +2,10 @@ from importlib import metadata
 
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
+from tracking_ui.web.lifetime import register_startup_event, register_shutdown_event
 from tracking_ui.web.api.router import api_router
-from tracking_ui.web.lifetime import register_shutdown_event, register_startup_event
 
 
 def get_app() -> FastAPI:
@@ -21,6 +22,19 @@ def get_app() -> FastAPI:
         redoc_url="/api/redoc",
         openapi_url="/api/openapi.json",
         default_response_class=UJSONResponse,
+    )
+
+    origins = [
+        "http://localhost:3000",
+        "localhost:3000",
+    ]
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     # Adds startup and shutdown events.
