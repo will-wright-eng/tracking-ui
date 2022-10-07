@@ -22,7 +22,7 @@ init: ## initalize project -- install poetry and pre-commit
 run-app: ## run app from poetry env var
 	poetry run python -m tracking_ui
 
-dc-up: ## build and start docker compose app
+dc-up: ## build and start docker compose app <-- doesn't work; port not exposed properly
 	docker-compose -f deploy/docker-compose.yml --project-directory . up --build
 
 dc-up-dev: ## start docker compose dev app
