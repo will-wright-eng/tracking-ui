@@ -19,14 +19,14 @@ init: ## initalize project -- install poetry and pre-commit
 	curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | $(PYTHON) -
 	pre-commit install
 
-run-app: ## run app from poetry env var
+run-po: ## run app from poetry virtual env
 	poetry run python -m tracking_ui
 
-dc-up: ## build and start docker compose app
-	docker-compose -f deploy/docker-compose.yml --project-directory . up --build
-
-dc-up-dev: ## start docker compose dev app
+run-dc: ## run app from docker compose with auto-reload <-- THIS ONE
 	docker-compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . up
+
+dc-up: ## build and start docker compose app <-- doesn't work; port not exposed properly
+	docker-compose -f deploy/docker-compose.yml --project-directory . up --build
 
 dc-test: ## run tests from docker compose
 	docker-compose -f deploy/docker-compose.yml --project-directory . run --rm api pytest -vv .
