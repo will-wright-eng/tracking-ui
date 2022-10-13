@@ -4,6 +4,8 @@ import configparser
 
 import boto3
 
+from .secrets import results_output_location
+
 # def get_default_region() -> str:
 #     config_file_path = pathlib.Path.home() / ".aws" / "config"
 #     if os.path.isfile(config_file_path):
@@ -16,11 +18,11 @@ import boto3
 
 
 class athenaMgmt:
-    def __init__(self):
+    def __init__(self, s3_output: str = results_output_location):
         # self.client = boto3.client(service_name="athena", region_name=get_default_region())
         self.client = boto3.client(service_name="athena", region_name="us-west-1")
         self.database_name = "athena_tutorial"
-        self.results_output_location = "s3://wwtestbucket/athena_test/queries/"
+        self.results_output_location = s3_output
         self.table_ddl = "funding_data.ddl"
         self.table_name = "funding_data"
 
