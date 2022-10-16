@@ -4,27 +4,31 @@ import configparser
 
 import boto3
 
-from .secrets import results_output_location
-
-# def get_default_region() -> str:
-#     config_file_path = pathlib.Path.home() / ".aws" / "config"
-#     if os.path.isfile(config_file_path):
-#         config = configparser.ConfigParser()
-#         config.read(config_file_path)
-#         return config["default"]["region"]
-#     else:
-#         region = "us-west-1"
-#         return region
-
 
 class athenaMgmt:
-    def __init__(self, s3_output: str = results_output_location):
-        # self.client = boto3.client(service_name="athena", region_name=get_default_region())
+    def __init__(self):
         self.client = boto3.client(service_name="athena", region_name="us-west-1")
-        self.database_name = "athena_tutorial"
-        self.results_output_location = s3_output
-        self.table_ddl = "funding_data.ddl"
-        self.table_name = "funding_data"
+
+        self.config = ConfigHandler(project_name)
+        if self.config.check_config_exists():
+            self.configs = self.config.get_configs()
+            self.bucket = self.configs.get("aws_bucket", None)
+            self.output_results = os.path.join(
+                self.configs.get("object_prefix", None),
+                "output",
+            )
+            self.input_queries = os.path.join(
+                self.configs.get("object_prefix", None),
+                "input",
+            )
+            self.object_prefix = self.configs.get("object_prefix", None)
+            self.database_name = self.configs.get("athena_db", None)
+        else:
+            echo("config file does not exist, run `smgmt` to configure project")
+
+    def set_table_name(self, table_name):
+        self.table_ddl = f"{table_name}.ddl"
+        self.table_name = table_name
 
     def has_query_succeeded(self, execution_id):
         """return: query_status"""
@@ -53,7 +57,7 @@ class athenaMgmt:
         """return: execution_id"""
         response = self.client.start_query_execution(
             QueryString=f"create database {self.database_name}",
-            ResultConfiguration={"OutputLocation": self.results_output_location},
+            ResultConfiguration={"OutputLocation": self.output_results},
         )
         return response["QueryExecutionId"]
 
@@ -62,7 +66,7 @@ class athenaMgmt:
         with open(self.table_ddl) as ddl:
             response = self.client.start_query_execution(
                 QueryString=ddl.read(),
-                ResultConfiguration={"OutputLocation": self.results_output_location},
+                ResultConfiguration={"OutputLocation": self.output_results},
             )
             return response["QueryExecutionId"]
 
@@ -71,7 +75,7 @@ class athenaMgmt:
         query = f"SELECT COUNT(*) from {self.database_name}.{self.table_name}"
         response = self.client.start_query_execution(
             QueryString=query,
-            ResultConfiguration={"OutputLocation": self.results_output_location},
+            ResultConfiguration={"OutputLocation": self.output_results},
         )
         return response["QueryExecutionId"]
 
