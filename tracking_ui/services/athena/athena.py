@@ -86,3 +86,22 @@ class athenaMgmt:
         )
         results = response["ResultSet"]["Rows"]
         return results
+
+    def build_create_table_query(
+        self,
+        table_name: str,
+        schema: str,
+        s3_path: str,
+    ) -> str:
+        self.query = f"""
+        create external table {table_name} (
+        {schema}
+        )
+        ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
+        WITH SERDEPROPERTIES ('ignore.malformed.json' = 'true')
+        location '{s3_path}';
+        """
+
+    def save_ddl_local(self):
+        with open(self.table_ddl, "w") as file:
+            file.write(self.query)
