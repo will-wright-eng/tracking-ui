@@ -1,8 +1,11 @@
+import json
 import time
 import pathlib
 import configparser
 
 import boto3
+
+from .utils import upload_to_storage
 
 
 class athenaMgmt:
@@ -105,3 +108,6 @@ class athenaMgmt:
     def save_ddl_local(self):
         with open(self.table_ddl, "w") as file:
             file.write(self.query)
+
+    def upload_ddl(self):
+        upload_to_storage(self.table_ddl)
