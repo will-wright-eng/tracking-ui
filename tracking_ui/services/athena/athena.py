@@ -1,18 +1,20 @@
-import json
-import time
-import pathlib
 import configparser
+import json
+import os
+import pathlib
+import time
 
 import boto3
 
+from .config import ConfigHandler
 from .utils import upload_to_storage
 
 
 class athenaMgmt:
-    def __init__(self):
+    def __init__(self, project_name: str = "tracking-ui-athena-dev"):
         self.client = boto3.client(service_name="athena", region_name="us-west-1")
 
-        self.config = ConfigHandler(project_name)
+        self.config = ConfigHandler(project_name=project_name)
         if self.config.check_config_exists():
             self.configs = self.config.get_configs()
             self.bucket = self.configs.get("aws_bucket", None)
@@ -94,7 +96,7 @@ class athenaMgmt:
         self,
         table_name: str,
         schema: str,
-        s3_path: str,
+        data_source: str,
     ) -> str:
         self.query = f"""
         create external table {table_name} (
@@ -102,7 +104,7 @@ class athenaMgmt:
         )
         ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
         WITH SERDEPROPERTIES ('ignore.malformed.json' = 'true')
-        location '{s3_path}';
+        location '{data_source}';
         """
 
     def save_ddl_local(self):
