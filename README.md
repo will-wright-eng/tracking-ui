@@ -18,7 +18,7 @@ This will start the server on the configured host.
 
 You can find swagger documentation at `/api/docs`.
 
-You can read more about poetry here: https://python-poetry.org/
+You can read more about poetry here: <https://python-poetry.org/>
 
 ## Docker
 
@@ -76,17 +76,19 @@ variable to configure the value. This behaviour can be changed by overriding `en
 in `tracking_ui.settings.Settings.Config`.
 
 An exmaple of .env file:
+
 ```bash
 TRACKING_UI_RELOAD="True"
 TRACKING_UI_PORT="8000"
 TRACKING_UI_ENVIRONMENT="dev"
 ```
 
-You can read more about BaseSettings class here: https://pydantic-docs.helpmanual.io/usage/settings/
+You can read more about BaseSettings class here: <https://pydantic-docs.helpmanual.io/usage/settings/>
 
 ## Pre-commit
 
 To install pre-commit simply run inside the shell:
+
 ```bash
 pre-commit install
 ```
@@ -95,15 +97,14 @@ pre-commit is very useful to check your code before publishing it.
 It's configured using .pre-commit-config.yaml file.
 
 By default it runs:
+
 * black (formats your code);
 * mypy (validates types);
 * isort (sorts imports in all files);
 * flake8 (spots possibe bugs);
 * yesqa (removes useless `# noqa` comments).
 
-
-You can read more about pre-commit here: https://pre-commit.com/
-
+You can read more about pre-commit here: <https://pre-commit.com/>
 
 ## Running tests
 
@@ -116,8 +117,8 @@ docker-compose -f deploy/docker-compose.yml --project-directory . down
 
 For running tests on your local machine.
 
-
 2. Run the pytest.
+
 ```bash
 pytest -vv .
 ```

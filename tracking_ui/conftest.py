@@ -1,8 +1,8 @@
 from typing import Any, AsyncGenerator
 
 import pytest
-from httpx import AsyncClient
 from fastapi import FastAPI
+from httpx import AsyncClient
 
 from tracking_ui.web.application import get_app
 
