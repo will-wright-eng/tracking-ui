@@ -6,8 +6,8 @@ import time
 
 import boto3
 
-from .config import ConfigHandler
-from .utils import upload_to_storage
+from .config import ConfigHandler  # # replace with sys-config
+from .utils import check_not_none, upload_to_storage, validate_args
 
 
 class athenaMgmt:
@@ -19,8 +19,10 @@ class athenaMgmt:
             self.configs = self.config.get_configs()
             self.bucket = self.configs.get("aws_bucket", None)
             self.output_results = os.path.join(
+                "s3://",
+                self.bucket,
                 self.configs.get("object_prefix", None),
-                "output",
+                "output/",
             )
             self.input_queries = os.path.join(
                 self.configs.get("object_prefix", None),
@@ -60,6 +62,7 @@ class athenaMgmt:
 
     def create_database(self):
         """return: execution_id"""
+        check_not_none(self.database_name)
         response = self.client.start_query_execution(
             QueryString=f"create database {self.database_name}",
             ResultConfiguration={"OutputLocation": self.output_results},
@@ -77,7 +80,17 @@ class athenaMgmt:
 
     def get_num_rows(self):
         """return: execution_id"""
+        check_not_none(self.database_name, self.table_name)
         query = f"SELECT COUNT(*) from {self.database_name}.{self.table_name}"
+        response = self.client.start_query_execution(
+            QueryString=query,
+            ResultConfiguration={"OutputLocation": self.output_results},
+        )
+        return response["QueryExecutionId"]
+
+    def get_sample(self):
+        """return: execution_id"""
+        query = f"SELECT * from {self.database_name}.{self.table_name} limit 100"
         response = self.client.start_query_execution(
             QueryString=query,
             ResultConfiguration={"OutputLocation": self.output_results},
@@ -92,14 +105,16 @@ class athenaMgmt:
         results = response["ResultSet"]["Rows"]
         return results
 
-    def build_create_table_query(
+    @validate_args
+    def compose_table_query(
         self,
         table_name: str,
         schema: str,
         data_source: str,
     ) -> str:
+        self.set_table_name(table_name)
         self.query = f"""
-        create external table {table_name} (
+        create external table {self.table_name} (
         {schema}
         )
         ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'

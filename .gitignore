@@ -1,6 +1,8 @@
-*/.DS_Store
-**/**.DS_Store
-tracking_ui/.DS_Store
+# directories
+tracking_ui/services/dev/
+
+# files
+**/.DS_Store
 **/**.ipynb
 **/Untitled.*
 Untitled.*
@@ -8,6 +10,7 @@ test.*
 test*
 secrets.py
 *.json
+**.ddl
 
 ### Python template
 
