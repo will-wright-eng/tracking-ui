@@ -10,10 +10,9 @@ from .config import ConfigHandler  # # replace with sys-config
 from .utils import check_not_none, upload_to_storage, validate_args
 
 
-class athenaMgmt:
-    def __init__(self, project_name: str = "tracking-ui-athena-dev"):
+class athenaBaseClass:
+    def __init__(self, project_name):
         self.client = boto3.client(service_name="athena", region_name="us-west-1")
-
         self.config = ConfigHandler(project_name=project_name)
         if self.config.check_config_exists():
             self.configs = self.config.get_configs()
@@ -33,11 +32,15 @@ class athenaMgmt:
         else:
             echo("config file does not exist, run `smgmt` to configure project")
 
-    def set_table_name(self, table_name):
-        self.table_ddl = f"{table_name}.ddl"
-        self.table_name = table_name
+    def check_status(self, execution_id: str = None):
+        """return: query_status"""
+        if execution_id:
+            response = self.client.get_query_execution(QueryExecutionId=execution_id)
+        else:
+            response = self.client.get_query_execution(QueryExecutionId=self.execution_id)
+        return response
 
-    def has_query_succeeded(self, execution_id):
+    def has_query_succeeded(self, execution_id: str = None):
         """return: query_status"""
         state = "RUNNING"
         max_execution = 5
@@ -55,10 +58,10 @@ class athenaMgmt:
             time.sleep(30)
         return False
 
-    def check_status(self, execution_id):
-        """return: query_status"""
-        response = self.client.get_query_execution(QueryExecutionId=execution_id)
-        return response
+
+class athenaAssetDb(athenaBaseClass):
+    def __init__(self, project_name: str = "tracking-ui-athena-dev"):
+        super().__init__(project_name)
 
     def create_database(self):
         """return: execution_id"""
@@ -67,7 +70,17 @@ class athenaMgmt:
             QueryString=f"create database {self.database_name}",
             ResultConfiguration={"OutputLocation": self.output_results},
         )
+        self.query_id = response["QueryExecutionId"]
         return response["QueryExecutionId"]
+
+
+class athenaAssetTable(athenaBaseClass):
+    def __init__(self, project_name: str = "tracking-ui-athena-dev"):
+        super().__init__(project_name)
+
+    def set_table_name(self, table_name):
+        self.table_ddl = f"{table_name}.ddl"
+        self.table_name = table_name
 
     def create_table(self):
         """return: execution_id"""
@@ -76,6 +89,7 @@ class athenaMgmt:
                 QueryString=ddl.read(),
                 ResultConfiguration={"OutputLocation": self.output_results},
             )
+            self.query_id = response["QueryExecutionId"]
             return response["QueryExecutionId"]
 
     def get_num_rows(self):
@@ -86,6 +100,7 @@ class athenaMgmt:
             QueryString=query,
             ResultConfiguration={"OutputLocation": self.output_results},
         )
+        self.query_id = response["QueryExecutionId"]
         return response["QueryExecutionId"]
 
     def get_sample(self):
@@ -95,9 +110,10 @@ class athenaMgmt:
             QueryString=query,
             ResultConfiguration={"OutputLocation": self.output_results},
         )
+        self.query_id = response["QueryExecutionId"]
         return response["QueryExecutionId"]
 
-    def get_query_results(self, execution_id):
+    def get_query_results(self, execution_id: str = None):
         """return: list of row dictionaries"""
         response = self.client.get_query_results(
             QueryExecutionId=execution_id,
@@ -121,6 +137,7 @@ class athenaMgmt:
         WITH SERDEPROPERTIES ('ignore.malformed.json' = 'true')
         location '{data_source}';
         """
+        return self.query
 
     def save_ddl_local(self):
         with open(self.table_ddl, "w") as file:
