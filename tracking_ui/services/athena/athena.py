@@ -1,7 +1,4 @@
-import configparser
-import json
 import os
-import pathlib
 import time
 
 import boto3
@@ -30,7 +27,7 @@ class athenaBaseClass:
             self.object_prefix = self.configs.get("object_prefix", None)
             self.database_name = self.configs.get("athena_db", None)
         else:
-            echo("config file does not exist, run `smgmt` to configure project")
+            print("config file does not exist, run `smgmt` to configure project")
 
     def check_status(self, execution_id: str = None):
         """return: query_status"""
