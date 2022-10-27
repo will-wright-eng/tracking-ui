@@ -2,11 +2,11 @@ import json
 from pathlib import Path
 
 
-def upload_to_storage(file_name: str) -> None:
+def upload_to_storage(file_name: str, storage_prefix: str = "input") -> None:
     from media_mgmt_cli.aws import AwsStorageMgmt
 
-    s3_mgmt = AwsStorageMgmt(project_name="tracking-ui")
-    s3_mgmt.upload_file(file_name, additional_prefix="input")
+    s3_mgmt = AwsStorageMgmt(project_name="tracking-ui-athena-dev")
+    s3_mgmt.upload_file(file_name, additional_prefix=storage_prefix)
 
 
 def get_sample_msg() -> dict:

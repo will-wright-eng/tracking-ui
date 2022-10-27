@@ -6,9 +6,9 @@
 
 ```sh
 touch funding_data.ddl
-aws s3 mb s3://wwtestbucket
-aws s3 cp funding_data.ddl s3://wwtestbucket/athena_test/queries/funding_data.ddl
-aws s3 cp athena_data.csv s3://wwtestbucket/input/
+aws s3 mb s3://<test bucket>
+aws s3 cp funding_data.ddl s3://<test bucket>/athena_test/queries/funding_data.ddl
+aws s3 cp athena_data.csv s3://<test bucket>/input/
 ```
 
 - `funding_data.ddl`
@@ -33,7 +33,7 @@ WITH SERDEPROPERTIES (
   'escapeChar' = '\\'
 )
 STORED AS TEXTFILE
-LOCATION 's3://wwtestbucket/input/';
+LOCATION 's3://<test bucket>/input/';
 ```
 
 - python class attributes/properties
@@ -41,7 +41,7 @@ LOCATION 's3://wwtestbucket/input/';
 ```py
 self.client = boto3.client("athena")
 self.database_name = "athena_tutorial"
-self.results_output_location = "s3://wwtestbucket/athena_test/queries/"
+self.results_output_location = "s3://<test bucket>/athena_test/queries/"
 self.table_ddl = "funding_data.ddl"
 self.table_name = "funding_data"
 ```
@@ -62,4 +62,10 @@ json_obj = tmp.split('/')[-1]
 sample_json = os.path.join(test_set,  json_obj)
 # 'dev/api-gateway/ea8268ef8df977938db5097dfd18f7cc3d0dcf5c6c57c6cea37fa427050d08c/tracking_extension_2022-09-18T08:24:31.599Z.json'
 s3_mgmt.download_file(sample_json)
+```
+
+## 2022-10-26
+
+```python
+
 ```

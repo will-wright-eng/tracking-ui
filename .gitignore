@@ -1,5 +1,5 @@
 # directories
-tracking_ui/services/dev/
+**/dev/
 
 # files
 **/.DS_Store
@@ -11,6 +11,7 @@ test*
 secrets.py
 *.json
 **.ddl
+*.csv
 
 ### Python template
 
