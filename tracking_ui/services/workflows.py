@@ -1,11 +1,10 @@
 import datetime as dt
-from pprint import pprint
 from typing import List
 
 import athena
 import pandas as pd
 from athena import secrets, utils
-from athena.athena import athenaAssetDb, athenaAssetTable, athenaBaseClass
+from athena.athena import athenaAssetTable, athenaBaseClass
 
 
 def map_attributes(source_class: athenaBaseClass, destination_class: athenaBaseClass):
@@ -43,8 +42,7 @@ def extract_values_from_row(row) -> List[str]:
     for ele in row:
         try:
             tmp = list(ele.values())[0]
-        except IndexError as e:
-            # print(e)
+        except IndexError:
             tmp = ""
         data.append(tmp)
     return data
