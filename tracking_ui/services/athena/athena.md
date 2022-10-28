@@ -66,7 +66,7 @@ s3_mgmt.download_file(sample_json)
 
 ## 2022-10-28
 
-**sample json**
+### sample json
 
 - aggregate multiple events into serialized payload that fits react example app
 
@@ -109,7 +109,7 @@ write_json(payload)
 
 > client blocked access when using Brave, works on Chrome
 
-**old endpoints**
+### old endpoints
 
 ```python
 from fastapi import APIRouter, Form, Request, status
