@@ -3,8 +3,8 @@ from typing import List
 
 import athena
 import pandas as pd
-from athena import secrets, utils
-from athena.athena import athenaAssetTable, athenaBaseClass
+from athena import utils, secrets
+from athena.athena import athenaBaseClass, athenaAssetTable
 
 
 def map_attributes(source_class: athenaBaseClass, destination_class: athenaBaseClass):
@@ -88,6 +88,7 @@ def athena_workflow_01():
     df = pd.DataFrame(data)
     df.columns = df.iloc[0]
     df = df.iloc[1:]
+    df["processed_timestamp"] = str(dt.datetime.now())
     filename = f"{table.table_name}.csv"
     df.to_csv(filename, index=False)
     utils.upload_to_storage(filename, storage_prefix="output/csv")

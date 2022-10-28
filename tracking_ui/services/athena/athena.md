@@ -64,8 +64,109 @@ sample_json = os.path.join(test_set,  json_obj)
 s3_mgmt.download_file(sample_json)
 ```
 
-## 2022-10-26
+## 2022-10-28
+
+**sample json**
+
+- aggregate multiple events into serialized payload that fits react example app
 
 ```python
+%reset -f
 
+import os
+import json
+from collections import Counter
+import datetime as dt
+
+def get_events():
+    files = os.listdir('.')
+    flist = [i for i in files if 'event_' in i]
+    data = []
+    for file in flist:
+        with open(file, 'r') as f:
+            data.append(json.loads(f.read()))
+    return data
+
+def generate_payload(data):
+    payload = {}
+    payload.update({
+        'events': data,
+        'count': len(data),
+        'timestamp': str(dt.datetime.now()),
+        'schema': dict(Counter([item for sublist in [list(i) for i in data] for item in sublist]))
+    })
+    return payload
+
+def write_json(payload):
+    filename = 'sample_payload.json'
+    with open(filename, 'w') as file:
+        file.write(json.dumps(payload))
+
+data = get_events()
+payload = generate_payload(data)
+write_json(payload)
+```
+
+> client blocked access when using Brave, works on Chrome
+
+**old endpoints**
+
+```python
+from fastapi import APIRouter, Form, Request, status
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
+
+from tracking_ui.services.athena.athena import athenaMgmt
+
+BASE_PATH = Path(__file__).resolve().parents[3]
+TEMPLATE_PATH = os.path.join(BASE_PATH, "templates")
+templates = Jinja2Templates(directory=TEMPLATE_PATH)
+
+data = {"query_id": "39d23ec9-82b8-41cc-a2a4-2f711d87439b"}
+athena = athenaMgmt()
+
+@router.get("/athena-results")
+def athena_results(request: Request):
+    if data:
+        logger.info(json.dumps(data))
+        response = athena.check_status(data.get("query_id"))
+        return templates.TemplateResponse(
+            "display-athena-resp-json.html",
+            context={"request": request, "resp": response},
+        )
+    else:
+        return templates.TemplateResponse(
+            "go-get-data.html",
+            context={"request": request},
+        )
+
+
+@router.post("/athena-results")
+def athena_results(request: Request):
+    redirect_url = request.url_for("athena_test")
+    logger.info(redirect_url)
+    return RedirectResponse(
+        redirect_url,
+        status_code=status.HTTP_302_FOUND,
+    )
+
+
+@router.get("/athena-test")
+def athena_test(request: Request):
+    return templates.TemplateResponse(
+        "form-athena.html",
+        context={"request": request},
+    )
+
+
+@router.post("/athena-test")
+def athena_test(request: Request):
+    query_id = athena.get_num_rows()
+    # data['query_id'] = query_id <-- see above
+    redirect_url = request.url_for("athena_results")
+    logger.info(redirect_url)
+    return RedirectResponse(
+        redirect_url,
+        status_code=status.HTTP_302_FOUND,
+    )
 ```
