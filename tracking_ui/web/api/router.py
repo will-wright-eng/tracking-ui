@@ -1,6 +1,6 @@
 from fastapi.routing import APIRouter
 
-from tracking_ui.web.api import react, athena, monitoring
+from tracking_ui.web.api import athena, monitoring, react
 
 api_router = APIRouter()
 api_router.include_router(monitoring.router, prefix="/health")

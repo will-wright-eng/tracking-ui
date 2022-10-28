@@ -1,5 +1,17 @@
-.DS_Store
-**/**.DS_Store
+# directories
+**/dev/
+
+# files
+**/.DS_Store
+**/**.ipynb
+**/Untitled.*
+Untitled.*
+test.*
+test*
+secrets.py
+*.json
+**.ddl
+*.csv
 
 ### Python template
 
