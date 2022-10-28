@@ -1,4 +1,4 @@
-## athena
+# athena implementation notes
 
 - [tutorial](https://www.learnaws.org/2022/01/16/aws-athena-boto3-guide/)
 
