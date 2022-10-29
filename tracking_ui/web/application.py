@@ -1,11 +1,11 @@
 from importlib import metadata
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import UJSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
+from tracking_ui.web.lifetime import register_startup_event, register_shutdown_event
 from tracking_ui.web.api.router import api_router
-from tracking_ui.web.lifetime import register_shutdown_event, register_startup_event
 
 
 def get_app() -> FastAPI:
