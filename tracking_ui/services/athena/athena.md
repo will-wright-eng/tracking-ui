@@ -125,6 +125,14 @@ templates = Jinja2Templates(directory=TEMPLATE_PATH)
 data = {"query_id": "39d23ec9-82b8-41cc-a2a4-2f711d87439b"}
 athena = athenaMgmt()
 
+
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, z):
+        if isinstance(z, datetime.datetime):
+            return str(z)
+        else:
+            return super().default(z)
+
 @router.get("/athena-results")
 def athena_results(request: Request):
     if data:
@@ -169,4 +177,89 @@ def athena_test(request: Request):
         redirect_url,
         status_code=status.HTTP_302_FOUND,
     )
+```
+
+## 2022-10-29 method comparision
+
+```python
+%reset -f
+
+from pprint import pprint
+from media_mgmt_cli import mmgmt_aws
+
+def create_set_id(blob):
+    return delim.join(blob.split(delim)[:-1])
+
+def create_set_dict01(obj_list):
+    data = {}
+    tmp_set = []
+    set_id = create_set_id(obj_list[0])
+    for blob in obj_list:
+
+        if set_id in blob:
+            tmp_set.append(blob.split(delim)[-1])
+        else:
+            # store set
+            data.update({set_id:tmp_set})
+            # start new set
+            tmp_set = []
+            set_id = create_set_id(blob)
+
+            tmp_set.append(blob.split(delim)[-1])
+    return data
+
+
+
+def create_metadata_dict(res):
+    keys = list(res)
+    blob_metadata = {i:j for i,j in zip(keys,[len(res.get(key)) for key in keys])}
+    print(len(blob_metadata))
+    print(sum(blob_metadata.values()))
+    return blob_metadata
+
+
+
+def get_ends(prefix,data):
+    first = '/'.join([prefix,data.get(prefix)[0]])
+    last = '/'.join([prefix,data.get(prefix)[-1]])
+    print(f'first: {first}')
+    print(f'last:  {last}')
+    return first, last
+
+
+
+def create_set_dict02(obj_list):
+    data = {}
+    set_ids = set([create_set_id(i) for i in obj_list])
+    for blob in obj_list:
+        for set_id in set_ids:
+            if set_id in blob:
+                if set_id in data:
+                    data[set_id].append(blob)
+                else:
+                    data[set_id] = [blob]
+    return data
+
+
+aws = mmgmt_aws.AwsStorageMgmt(project_name='tracking-ui-athena-dev')
+obj_list = aws.get_bucket_object_keys()
+
+delim = '/'
+
+res = create_set_dict01(obj_list)
+blob_metadata = create_metadata_dict(res)
+
+import pandas as pd
+left = pd.DataFrame([list(blob_metadata.keys()), list(blob_metadata.values())]).T
+left.columns = ['set_id','count']
+
+res = create_set_dict02(obj_list)
+blob_metadata = create_metadata_dict(res)
+
+right = pd.DataFrame([list(blob_metadata.keys()), list(blob_metadata.values())]).T
+right.columns = ['set_id','count']
+
+df = pd.merge(left=left,right=right,how='outer',on='set_id')
+df['count_diff'] = df.count_x - df.count_y
+df
 ```

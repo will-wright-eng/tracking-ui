@@ -6,7 +6,7 @@ function App() {
   const [data, setData] = useState([]);
 
   const fetchData = () => {
-    fetch(`http://0.0.0.0:8000/v1/athena/sample-json`)
+    fetch(`http://0.0.0.0:8000/v1/athena/prod-payload`)
       .then((response) => response.json())
       .then((actualData) => {
         console.log(actualData);
