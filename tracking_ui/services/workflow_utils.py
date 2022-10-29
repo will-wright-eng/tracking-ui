@@ -17,6 +17,11 @@ def map_attributes(source_class: athenaBaseClass, destination_class: athenaBaseC
     return destination_class
 
 
+######################
+# athena_workflow_01 #
+######################
+
+
 def table_setup(class_obj) -> None:
     bucket_name = secrets.bucket_name
     test_set = secrets.test_set
@@ -58,6 +63,11 @@ def extract_values_from_result_set(rows) -> List[str]:
     for row in rows:
         data.append(extract_values_from_row(row.get("Data")))
     return data
+
+
+##########################
+# get_events_workflow_01 #
+##########################
 
 
 def filter_events(event_list, filter_by, event_key, op_funk=operator.eq):
