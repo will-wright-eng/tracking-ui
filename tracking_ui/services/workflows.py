@@ -66,6 +66,17 @@ def athena_workflow_01():
 
 
 def get_events_workflow_01():
+    """
+    create payload json for react frontend
+
+    1. get all keys in bucket
+    2. create a dictionary of prefix to file paths
+    3. filter by current EXTENSION_VERSION
+    4. download file set
+    5. load file set & filter
+    6. write payload to json file
+    7. remove() downloaded files
+    """
     aws = mmgmt_aws.AwsStorageMgmt(project_name="tracking-ui-athena-dev")
     obj_list = aws.get_bucket_object_keys()
     res = create_set_dict(obj_list)
