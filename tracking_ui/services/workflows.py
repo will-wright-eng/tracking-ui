@@ -12,6 +12,7 @@ from media_mgmt_cli import mmgmt_aws
 from .workflow_utils import (
     write_json,
     table_setup,
+    filter_events,
     get_json_data,
     put_check_get,
     create_set_dict,

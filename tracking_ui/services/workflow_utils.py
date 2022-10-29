@@ -2,13 +2,11 @@ import os
 import json
 import datetime as dt
 import operator
-from pprint import pprint
 from typing import List
 from collections import Counter
 
 from athena import utils, secrets
 from athena.athena import athenaBaseClass
-from media_mgmt_cli import mmgmt_aws
 
 EXTENSION_VERSION = "prod/0.7.0"
 DELIM = "/"
@@ -86,7 +84,7 @@ def create_metadata_dict(res):
 
 def create_set_dict(obj_list):
     data = {}
-    set_ids = set(create_set_id(i) for i in obj_list)
+    set_ids = {create_set_id(i) for i in obj_list}
     for blob in obj_list:
         for set_id in set_ids:
             if set_id in blob:
