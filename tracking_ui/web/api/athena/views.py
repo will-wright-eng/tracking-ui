@@ -15,10 +15,7 @@ def athena_results(request: Request):
     return JSONResponse(content=jsonable_encoder(prod070_payload))
 
 
-# @router.get("/prod-payload")
-# def prod_payload(request: Request):
-#     return prod070_payload
-
+# note: this is is differnt approach that would achieve the same thing
 # @app.get('/')
 # def main():
 #     json_str = json.dumps(d, indent=4, default=str)
