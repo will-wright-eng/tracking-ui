@@ -62,4 +62,4 @@ repos:
     - flake8-comprehensions
     - flake8-simplify
     verbose: true
-    entry: bash -c 'flake8 "$@" || true' --
+    entry: bash -c 'flake8 --ignore=E501 "$@" || true' --

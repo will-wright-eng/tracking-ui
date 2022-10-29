@@ -1,11 +1,28 @@
+import os
 import datetime as dt
+import operator
+from pprint import pprint
 
 import athena
 import pandas as pd
 from athena import utils
 from athena.athena import athenaAssetTable
+from media_mgmt_cli import mmgmt_aws
 
-from .workflow_utils import table_setup, put_check_get, extract_values_from_result_set
+from .workflow_utils import (
+    write_json,
+    table_setup,
+    get_json_data,
+    put_check_get,
+    create_set_dict,
+    generate_payload,
+    cleanup_local_files,
+    get_event_file_list,
+    extract_values_from_result_set,
+)
+
+EXTENSION_VERSION = "prod/0.7.0"
+DELIM = "/"
 
 
 def athena_workflow_01():
@@ -45,3 +62,30 @@ def athena_workflow_01():
     filename = f"{table.table_name}.csv"
     df.to_csv(filename, index=False)
     utils.upload_to_storage(filename, storage_prefix="output/csv")
+
+
+def get_events_workflow_01():
+    aws = mmgmt_aws.AwsStorageMgmt(project_name="tracking-ui-athena-dev")
+    obj_list = aws.get_bucket_object_keys()
+    res = create_set_dict(obj_list)
+
+    prod_file_set = get_event_file_list(res)
+
+    for file in prod_file_set:
+        aws.download_file(file)
+
+    file_names = [i.split(DELIM)[-1] for i in prod_file_set]
+
+    data = []
+    for file_name in file_names:
+        data.append(get_json_data(file_name))
+
+    event_key = "tab_title"
+    filter_by = None
+    filtered_data = filter_events(data, filter_by, event_key, op_funk=operator.ne)
+
+    payload = generate_payload(filtered_data)
+    write_json(payload)
+
+    cleanup_local_files(file_names)
+    pprint(set(os.listdir(".")))

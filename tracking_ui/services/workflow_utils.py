@@ -1,8 +1,17 @@
+import os
+import json
 import datetime as dt
+import operator
+from pprint import pprint
 from typing import List
+from collections import Counter
 
 from athena import utils, secrets
-from athena.athena import athenaBaseClass, athenaAssetTable
+from athena.athena import athenaBaseClass
+from media_mgmt_cli import mmgmt_aws
+
+EXTENSION_VERSION = "prod/0.7.0"
+DELIM = "/"
 
 
 def map_attributes(source_class: athenaBaseClass, destination_class: athenaBaseClass):
@@ -51,3 +60,73 @@ def extract_values_from_result_set(rows) -> List[str]:
     for row in rows:
         data.append(extract_values_from_row(row.get("Data")))
     return data
+
+
+def filter_events(event_list, filter_by, event_key, op_funk=operator.eq):
+    tmp = list(
+        filter(
+            lambda x: op_funk(x.get(event_key), filter_by),
+            event_list,
+        ),
+    )
+    return tmp
+
+
+def create_set_id(blob):
+    return DELIM.join(blob.split(DELIM)[:-1])
+
+
+def create_metadata_dict(res):
+    keys = list(res)
+    blob_metadata = {i: j for i, j in zip(keys, [len(res.get(key)) for key in keys])}
+    print(len(blob_metadata))
+    print(sum(blob_metadata.values()))
+    return blob_metadata
+
+
+def create_set_dict(obj_list):
+    data = {}
+    set_ids = set(create_set_id(i) for i in obj_list)
+    for blob in obj_list:
+        for set_id in set_ids:
+            if set_id in blob:
+                if set_id in data:
+                    data[set_id].append(blob)
+                else:
+                    data[set_id] = [blob]
+    return data
+
+
+def get_event_file_list(res):
+    prod_set = [i for i in list(res) if EXTENSION_VERSION in i]
+    return [item for sublist in [res[i] for i in prod_set] for item in sublist]
+
+
+def get_json_data(file_name):
+    with open(file_name, "r") as file:
+        data = json.loads(file.read())
+    return data
+
+
+def generate_payload(data):
+    return {
+        "events": data,
+        "count": len(data),
+        "timestamp": str(dt.datetime.now()),
+        "schema": dict(Counter([item for sublist in [list(i) for i in data] for item in sublist])),
+    }
+
+
+def write_json(payload):
+    file_name = f'{EXTENSION_VERSION.replace("/","-").replace(".","")}_payload.json'
+    with open(file_name, "w", encoding="utf8") as json_file:
+        json.dump(payload, json_file, ensure_ascii=False)
+    return file_name
+
+
+def cleanup_local_files(file_names):
+    for file_name in file_names:
+        try:
+            os.remove(file_name)
+        except Exception as e:
+            print(e)
