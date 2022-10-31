@@ -3,8 +3,8 @@ import time
 
 import boto3
 
+from .utils import validate_args, check_not_none, upload_to_storage
 from .config import ConfigHandler  # # replace with sys-config
-from .utils import check_not_none, upload_to_storage, validate_args
 
 
 class athenaBaseClass:

@@ -1,58 +1,29 @@
+import os
 import datetime as dt
-from typing import List
+import operator
+from pprint import pprint
 
 import athena
 import pandas as pd
-from athena import utils, secrets
-from athena.athena import athenaBaseClass, athenaAssetTable
+from athena import utils
+from athena.athena import athenaAssetTable
+from media_mgmt_cli import mmgmt_aws
 
+from .workflow_utils import (
+    write_json,
+    table_setup,
+    filter_events,
+    get_json_data,
+    put_check_get,
+    create_set_dict,
+    generate_payload,
+    cleanup_local_files,
+    get_event_file_list,
+    extract_values_from_result_set,
+)
 
-def map_attributes(source_class: athenaBaseClass, destination_class: athenaBaseClass):
-    destination_class.__dict__.update(source_class.__dict__)
-    return destination_class
-
-
-def table_setup(class_obj) -> None:
-    bucket_name = secrets.bucket_name
-    test_set = secrets.test_set
-    data_source = f"{bucket_name}/{test_set}"
-    ts = "".join([c for c in str(dt.datetime.today()) if c in "1234567890 "]).replace(" ", "_")
-    table_name = f"dev_test_table_{ts}"
-    msg = utils.get_sample_msg()
-    schema = " string,\n".join(list(msg)) + " string"
-
-    class_obj.compose_new_table_query(table_name, schema, data_source)
-    class_obj.save_query_to_ddl()
-
-
-def put_check_get(class_obj_recursive_check, class_obj_put_method) -> dict:
-    """
-    the sequence is fairly generic after the unique query has been input, this
-        method will create a robust method of getting results from a set of inputs
-
-    input: class object put method
-    output: results reponse json object
-    """
-    class_obj_put_method()
-    return class_obj_recursive_check()
-
-
-def extract_values_from_row(row) -> List[str]:
-    data = []
-    for ele in row:
-        try:
-            tmp = list(ele.values())[0]
-        except IndexError:
-            tmp = ""
-        data.append(tmp)
-    return data
-
-
-def extract_values_from_result_set(rows) -> List[str]:
-    data = []
-    for row in rows:
-        data.append(extract_values_from_row(row.get("Data")))
-    return data
+EXTENSION_VERSION = "prod/0.7.0"
+DELIM = "/"
 
 
 def athena_workflow_01():
@@ -92,3 +63,41 @@ def athena_workflow_01():
     filename = f"{table.table_name}.csv"
     df.to_csv(filename, index=False)
     utils.upload_to_storage(filename, storage_prefix="output/csv")
+
+
+def get_events_workflow_01():
+    """
+    create payload json for react frontend
+
+    1. get all keys in bucket
+    2. create a dictionary of prefix to file paths
+    3. filter by current EXTENSION_VERSION
+    4. download file set
+    5. load file set & filter
+    6. write payload to json file
+    7. remove() downloaded files
+    """
+    aws = mmgmt_aws.AwsStorageMgmt(project_name="tracking-ui-athena-dev")
+    obj_list = aws.get_bucket_object_keys()
+    res = create_set_dict(obj_list)
+
+    prod_file_set = get_event_file_list(res)
+
+    for file in prod_file_set:
+        aws.download_file(file)
+
+    file_names = [i.split(DELIM)[-1] for i in prod_file_set]
+
+    data = []
+    for file_name in file_names:
+        data.append(get_json_data(file_name))
+
+    event_key = "tab_title"
+    filter_by = None
+    filtered_data = filter_events(data, filter_by, event_key, op_funk=operator.ne)
+
+    payload = generate_payload(filtered_data)
+    write_json(payload)
+
+    cleanup_local_files(file_names)
+    pprint(set(os.listdir(".")))

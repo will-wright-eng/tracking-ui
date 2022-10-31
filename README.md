@@ -1,6 +1,6 @@
 # tracking_ui
 
-This project was generated using fastapi_template.
+This project was generated using [fastapi_template](https://github.com/s3rius/FastAPI-template).
 
 ## Poetry
 
