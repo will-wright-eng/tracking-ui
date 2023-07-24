@@ -17,3 +17,15 @@ cat requirements.txt | xargs poetry add
 poetry export -f requirements.txt --output requirements.txt
 docker build -t test .
 ```
+
+Change the line:
+"react": "^16.13.1"
+
+to:
+"react": "^17.0.2"
+
+```bash
+cd frontend/
+npm install react react-dom
+npm audit fix --force
+```
