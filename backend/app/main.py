@@ -1,18 +1,17 @@
-import uvicorn
-from app import tasks
-from fastapi import Depends, FastAPI
-from app.core import config
-from app.core.auth import get_current_active_user
-from app.db.session import SessionLocal
+from fastapi import FastAPI, Depends
 from starlette.requests import Request
-from app.core.celery_app import celery_app
-from app.api.api_v1.routers.auth import auth_router
+import uvicorn
+
 from app.api.api_v1.routers.users import users_router
+from app.api.api_v1.routers.auth import auth_router
+from app.core import config
+from app.db.session import SessionLocal
+from app.core.auth import get_current_active_user
+from app import tasks
+
 
 app = FastAPI(
-    title=config.PROJECT_NAME,
-    docs_url="/api/docs",
-    openapi_url="/api",
+    title=config.PROJECT_NAME, docs_url="/api/docs", openapi_url="/api"
 )
 
 
