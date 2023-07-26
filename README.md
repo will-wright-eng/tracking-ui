@@ -31,26 +31,26 @@ To run the alembic migrations (for the users table):
 docker-compose run --rm backend alembic upgrade head
 ```
 
-And navigate to <http://localhost:8000>
+And navigate to http://localhost:8000
 
 _Note: If you see an Nginx error at first with a `502: Bad Gateway` page, you may have to wait for webpack to build the development server (the nginx container builds much more quickly)._
 
 Auto-generated docs will be at
-<http://localhost:8000/api/docs>
+http://localhost:8000/api/docs
 
-### Rebuilding containers
+### Rebuilding containers:
 
 ```
 docker-compose build
 ```
 
-### Restarting containers
+### Restarting containers:
 
 ```
 docker-compose restart
 ```
 
-### Bringing containers down
+### Bringing containers down:
 
 ```
 docker-compose down
@@ -67,7 +67,7 @@ npm install
 npm start
 ```
 
-This should redirect you to <http://localhost:3000>
+This should redirect you to http://localhost:3000
 
 ### Frontend Tests
 

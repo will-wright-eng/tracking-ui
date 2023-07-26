@@ -1,6 +1,5 @@
-import typing as t
-
 from pydantic import BaseModel
+import typing as t
 
 
 class UserBase(BaseModel):

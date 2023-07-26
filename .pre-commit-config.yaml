@@ -8,7 +8,7 @@ default_stages: [commit, push]
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v2.5.0
   hooks:
   - id: check-yaml
   - id: end-of-file-fixer
@@ -17,11 +17,11 @@ repos:
   - id: check-toml
   - id: check-ast
 - repo: https://github.com/asottile/add-trailing-comma
-  rev: v3.0.0
+  rev: v2.1.0
   hooks:
   - id: add-trailing-comma
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.10.0
+  rev: v2.1.0
   hooks:
   - id: pretty-format-yaml
     args:
@@ -29,7 +29,7 @@ repos:
     - --preserve-quotes
     - --indent=2
 - repo: https://github.com/igorshubovych/markdownlint-cli
-  rev: v0.35.0
+  rev: v0.32.2
   hooks:
   - id: markdownlint
     args:
@@ -37,12 +37,12 @@ repos:
     verbose: true
     entry: bash -c 'markdownlint "$@" || true' --
 - repo: https://github.com/psf/black
-  rev: 23.7.0
+  rev: 22.3.0
   hooks:
   - id: black
     entry: black -l 120
 - repo: https://github.com/pycqa/isort
-  rev: 5.12.0
+  rev: 5.10.1
   hooks:
   - id: isort
     name: isort (python)
@@ -54,7 +54,7 @@ repos:
     name: isort (pyi)
     types: [pyi]
 - repo: https://github.com/pycqa/flake8
-  rev: 6.0.0
+  rev: 4.0.1
   hooks:
   - id: flake8
     additional_dependencies:

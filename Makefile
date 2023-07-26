@@ -1,6 +1,6 @@
 #* Variables
 SHELL := /usr/bin/env bash
-PYTHON := python3
+PYTHON := python3.8
 PYTHONPATH := `pwd`
 
 #* Docker variables
@@ -16,6 +16,7 @@ help: ## list make commands
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 init: ## init project
+	brew install python@3.8
 	docker-compose run --rm backend alembic upgrade head
 	bash scripts/build.sh
 
@@ -28,10 +29,23 @@ open: ## open http://localhost:8000/
 open-api: ## open http://localhost:8000/api/docs
 	open http://localhost:8000/api/docs
 
-poetry-set: ## updates lockfile, exports requirements.txt, and reinstalls
-	poetry lock -n && poetry export --without-hashes > requirements.txt
-	poetry install -n
-	#poetry run mypy --install-types --non-interactive ./
-
 docker-kill: ## kill all docker containers
 	for id in $$(docker ps --format "{{.ID}}"); do docker kill $$id; done
+
+#* Cleaning
+pycache-remove: ## cleanup subcommand - pycache-remove
+	find . | grep -E "(__pycache__|\.pyc|\.pyo$$)" | xargs rm -rf
+
+dsstore-remove: ## cleanup subcommand - dsstore-remove
+	find . | grep -E ".DS_Store" | xargs rm -rf
+
+mypycache-remove: ## cleanup subcommand - mypycache-remove
+	find . | grep -E ".mypy_cache" | xargs rm -rf
+
+ipynbcheckpoints-remove: ## cleanup subcommand - ipynbcheckpoints-remove
+	find . | grep -E ".ipynb_checkpoints" | xargs rm -rf
+
+pytestcache-remove: ## cleanup subcommand - pytestcache-remove
+	find . | grep -E ".pytest_cache" | xargs rm -rf
+
+cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove pytestcache-remove
