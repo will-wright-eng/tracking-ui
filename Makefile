@@ -1,6 +1,6 @@
 #* Variables
 SHELL := /usr/bin/env bash
-PYTHON := python3
+PYTHON := python3.8
 PYTHONPATH := `pwd`
 
 #* Docker variables
@@ -15,47 +15,37 @@ help: ## list make commands
 	@echo ${MAKEFILE_LIST}
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-init: ## initalize project -- install poetry and pre-commit
-	curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | $(PYTHON) -
-	pre-commit install
+init: ## init project
+	brew install python@3.8
+	docker-compose run --rm backend alembic upgrade head
+	bash scripts/build.sh
 
-run-po: ## run app from poetry virtual env
-	poetry run python -m tracking_ui
+up: ## start app (no daemon mode)
+	docker-compose up --build --remove-orphans
 
-run-dc: ## run app from docker compose with auto-reload <-- THIS ONE
-	docker-compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . up
+open: ## open http://localhost:8000/
+	open http://localhost:8000/
 
-dc-up: ## build and start docker compose app <-- doesn't work; port not exposed properly
-	docker-compose -f deploy/docker-compose.yml --project-directory . up --build
+open-api: ## open http://localhost:8000/api/docs
+	open http://localhost:8000/api/docs
 
-dc-test: ## run tests from docker compose
-	docker-compose -f deploy/docker-compose.yml --project-directory . run --rm api pytest -vv .
-	docker-compose -f deploy/docker-compose.yml --project-directory . down
+docker-kill: ## kill all docker containers
+	for id in $$(docker ps --format "{{.ID}}"); do docker kill $$id; done
 
-dc-test-kill: ## kill docker compose tests
-	docker-compose -f deploy/docker-compose.yml --project-directory . down
+#* Cleaning
+pycache-remove: ## cleanup subcommand - pycache-remove
+	find . | grep -E "(__pycache__|\.pyc|\.pyo$$)" | xargs rm -rf
 
-docker-build: ## build docker image
-	@echo Building docker $(IMAGE):$(VERSION) ...
-	docker build \
-		-t $(IMAGE):$(VERSION) . \
-		-f ./deploy/Dockerfile --no-cache
+dsstore-remove: ## cleanup subcommand - dsstore-remove
+	find . | grep -E ".DS_Store" | xargs rm -rf
 
-poetry-set: ## updates lockfile, exports requirements.txt, and reinstalls
-	poetry lock -n && poetry export --without-hashes > requirements.txt
-	poetry install -n
-	#poetry run mypy --install-types --non-interactive ./
+mypycache-remove: ## cleanup subcommand - mypycache-remove
+	find . | grep -E ".mypy_cache" | xargs rm -rf
 
-pre-commit-install: ## -- old list --
-	poetry run pre-commit install
+ipynbcheckpoints-remove: ## cleanup subcommand - ipynbcheckpoints-remove
+	find . | grep -E ".ipynb_checkpoints" | xargs rm -rf
 
-codestyle: ## -- old list --
-	poetry run pyupgrade --exit-zero-even-if-changed --py39-plus **/*.py
-	poetry run isort --settings-path pyproject.toml ./
-# 	poetry run black --config pyproject.toml ./
+pytestcache-remove: ## cleanup subcommand - pytestcache-remove
+	find . | grep -E ".pytest_cache" | xargs rm -rf
 
-# Example: make docker-remove VERSION=latest
-# Example: make docker-remove IMAGE=some_name VERSION=0.1.0
-docker-remove: ## -- old list --
-	@echo Removing docker $(IMAGE):$(VERSION) ...
-	docker rmi -f $(IMAGE):$(VERSION)
+cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove pytestcache-remove

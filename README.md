@@ -1,124 +1,159 @@
-# tracking_ui
+# tracking-ui
 
-This project was generated using [fastapi_template](https://github.com/s3rius/FastAPI-template).
+## Features
 
-## Poetry
+- **FastAPI** with Python 3.8
+- **React 16** with Typescript, Redux, and react-router
+- Postgres
+- SqlAlchemy with Alembic for migrations
+- Pytest for backend tests
+- Jest for frontend tests
+- Perttier/Eslint (with Airbnb style guide)
+- Docker compose for easier development
+- Nginx as a reverse proxy to allow backend and frontend on the same port
 
-This project uses poetry. It's a modern dependency management
-tool.
+## Development
 
-To run the project use this set of commands:
+The only dependencies for this project should be docker and docker-compose.
+
+### Quick Start
+
+Starting the project with hot-reloading enabled
+(the first time it will take a while):
 
 ```bash
-poetry install
-poetry run python -m tracking_ui
+docker-compose up -d
 ```
 
-This will start the server on the configured host.
-
-You can find swagger documentation at `/api/docs`.
-
-You can read more about poetry here: <https://python-poetry.org/>
-
-## Docker
-
-You can start the project with docker using this command:
+To run the alembic migrations (for the users table):
 
 ```bash
-docker-compose -f deploy/docker-compose.yml --project-directory . up --build
+docker-compose run --rm backend alembic upgrade head
 ```
 
-If you want to develop in docker with autoreload add `-f deploy/docker-compose.dev.yml` to your docker command.
-Like this:
+And navigate to http://localhost:8000
 
-```bash
-docker-compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . up
+_Note: If you see an Nginx error at first with a `502: Bad Gateway` page, you may have to wait for webpack to build the development server (the nginx container builds much more quickly)._
+
+Auto-generated docs will be at
+http://localhost:8000/api/docs
+
+### Rebuilding containers:
+
+```
+docker-compose build
 ```
 
-This command exposes the web application on port 8000, mounts current directory and enables autoreload.
+### Restarting containers:
 
-But you have to rebuild image every time you modify `poetry.lock` or `pyproject.toml` with this command:
-
-```bash
-docker-compose -f deploy/docker-compose.yml --project-directory . build
+```
+docker-compose restart
 ```
 
-## Project structure
+### Bringing containers down:
 
-```bash
-$ tree "tracking_ui"
-tracking_ui
-├── conftest.py  # Fixtures for all tests.
-├── __main__.py  # Startup script. Starts uvicorn.
-├── services  # Package for different external services such as rabbit or redis etc.
-├── settings.py  # Main configuration settings for project.
-├── static  # Static content.
-├── tests  # Tests for project.
-└── web  # Package contains web server. Handlers, startup config.
-    ├── api  # Package with all handlers.
-    │   └── router.py  # Main router.
-    ├── application.py  # FastAPI application configuration.
-    └── lifetime.py  # Contains actions to perform on startup and shutdown.
+```
+docker-compose down
 ```
 
-## Configuration
+### Frontend Development
 
-This application can be configured with environment variables.
+Alternatively to running inside docker, it can sometimes be easier
+to use npm directly for quicker reloading. To run using npm:
 
-You can create `.env` file in the root directory and place all
-environment variables here.
-
-All environment variabels should start with "TRACKING_UI_" prefix.
-
-For example if you see in your "tracking_ui/settings.py" a variable named like
-`random_parameter`, you should provide the "TRACKING_UI_RANDOM_PARAMETER"
-variable to configure the value. This behaviour can be changed by overriding `env_prefix` property
-in `tracking_ui.settings.Settings.Config`.
-
-An exmaple of .env file:
-
-```bash
-TRACKING_UI_RELOAD="True"
-TRACKING_UI_PORT="8000"
-TRACKING_UI_ENVIRONMENT="dev"
+```
+cd frontend
+npm install
+npm start
 ```
 
-You can read more about BaseSettings class here: <https://pydantic-docs.helpmanual.io/usage/settings/>
+This should redirect you to http://localhost:3000
 
-## Pre-commit
+### Frontend Tests
 
-To install pre-commit simply run inside the shell:
-
-```bash
-pre-commit install
+```
+cd frontend
+npm install
+npm test
 ```
 
-pre-commit is very useful to check your code before publishing it.
-It's configured using .pre-commit-config.yaml file.
+## Migrations
 
-By default it runs:
+Migrations are run using alembic. To run all migrations:
 
-* black (formats your code);
-* mypy (validates types);
-* isort (sorts imports in all files);
-* flake8 (spots possibe bugs);
-* yesqa (removes useless `# noqa` comments).
-
-You can read more about pre-commit here: <https://pre-commit.com/>
-
-## Running tests
-
-If you want to run it in docker, simply run:
-
-```bash
-docker-compose -f deploy/docker-compose.yml --project-directory . run --rm api pytest -vv .
-docker-compose -f deploy/docker-compose.yml --project-directory . down
+```
+docker-compose run --rm backend alembic upgrade head
 ```
 
-For running tests on your local machine.
+To create a new migration:
 
-2. Run the pytest.
+```
+alembic revision -m "create users table"
+```
 
-```bash
-pytest -vv .
+And fill in `upgrade` and `downgrade` methods. For more information see
+[Alembic's official documentation](https://alembic.sqlalchemy.org/en/latest/tutorial.html#create-a-migration-script).
+
+## Testing
+
+There is a helper script for both frontend and backend tests:
+
+```
+./scripts/test.sh
+```
+
+### Backend Tests
+
+```
+docker-compose run backend pytest
+```
+
+any arguments to pytest can also be passed after this command
+
+### Frontend Tests
+
+```
+docker-compose run frontend test
+```
+
+This is the same as running npm test from within the frontend directory
+
+## Logging
+
+```
+docker-compose logs
+```
+
+Or for a specific service:
+
+```
+docker-compose logs -f name_of_service # frontend|backend|db
+```
+
+## Project Layout
+
+```
+backend
+└── app
+    ├── alembic
+    │   └── versions # where migrations are located
+    ├── api
+    │   └── api_v1
+    │       └── endpoints
+    ├── core    # config
+    ├── db      # db models
+    ├── tests   # pytest
+    └── main.py # entrypoint to backend
+
+frontend
+└── public
+└── src
+    ├── components
+    │   └── Home.tsx
+    ├── config
+    │   └── index.tsx   # constants
+    ├── __tests__
+    │   └── test_home.tsx
+    ├── index.tsx   # entrypoint
+    └── App.tsx     # handles routing
 ```
