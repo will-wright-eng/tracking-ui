@@ -1,9 +1,10 @@
-from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
 import typing as t
 
-from . import models, schemas
+from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
 from app.core.security import get_password_hash
+
+from . import models, schemas
 
 
 def get_user(db: Session, user_id: int):
@@ -18,7 +19,9 @@ def get_user_by_email(db: Session, email: str) -> schemas.UserBase:
 
 
 def get_users(
-    db: Session, skip: int = 0, limit: int = 100
+    db: Session,
+    skip: int = 0,
+    limit: int = 100,
 ) -> t.List[schemas.UserOut]:
     return db.query(models.User).offset(skip).limit(limit).all()
 
@@ -49,7 +52,9 @@ def delete_user(db: Session, user_id: int):
 
 
 def edit_user(
-    db: Session, user_id: int, user: schemas.UserEdit
+    db: Session,
+    user_id: int,
+    user: schemas.UserEdit,
 ) -> schemas.User:
     db_user = get_user(db, user_id)
     if not db_user:

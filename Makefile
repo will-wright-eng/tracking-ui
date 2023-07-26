@@ -15,6 +15,10 @@ help: ## list make commands
 	@echo ${MAKEFILE_LIST}
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
+init: ## init project
+	docker-compose run --rm backend alembic upgrade head
+	bash scripts/build.sh
+
 up: ## start app (no daemon mode)
 	docker-compose up --build --remove-orphans
 

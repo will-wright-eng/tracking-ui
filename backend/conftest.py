@@ -1,14 +1,14 @@
-import pytest
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy_utils import database_exists, create_database, drop_database
-from fastapi.testclient import TestClient
 import typing as t
 
-from app.core import config, security
-from app.db.session import Base, get_db
+import pytest
 from app.db import models
+from app.core import config, security
 from app.main import app
+from sqlalchemy import event, create_engine
+from app.db.session import Base, get_db
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy_utils import drop_database, create_database, database_exists
+from fastapi.testclient import TestClient
 
 
 def get_test_db_url() -> str:
@@ -31,7 +31,9 @@ def test_db():
 
     # Run a parent transaction that can roll back all changes
     test_session_maker = sessionmaker(
-        autocommit=False, autoflush=False, bind=engine
+        autocommit=False,
+        autoflush=False,
+        bind=engine,
     )
     test_session = test_session_maker()
     test_session.begin_nested()
@@ -60,7 +62,7 @@ def create_test_db():
 
     # Create the test database
     assert not database_exists(
-        test_db_url
+        test_db_url,
     ), "Test database already exists. Aborting tests."
     create_database(test_db_url)
     test_engine = create_engine(test_db_url)
@@ -137,7 +139,10 @@ def verify_password_mock(first: str, second: str) -> bool:
 
 @pytest.fixture
 def user_token_headers(
-    client: TestClient, test_user, test_password, monkeypatch
+    client: TestClient,
+    test_user,
+    test_password,
+    monkeypatch,
 ) -> t.Dict[str, str]:
     monkeypatch.setattr(security, "verify_password", verify_password_mock)
 
@@ -154,7 +159,10 @@ def user_token_headers(
 
 @pytest.fixture
 def superuser_token_headers(
-    client: TestClient, test_superuser, test_password, monkeypatch
+    client: TestClient,
+    test_superuser,
+    test_password,
+    monkeypatch,
 ) -> t.Dict[str, str]:
     monkeypatch.setattr(security, "verify_password", verify_password_mock)
 

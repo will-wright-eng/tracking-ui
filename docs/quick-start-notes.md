@@ -29,6 +29,7 @@ cd frontend/
 npm install react react-dom
 npm audit fix --force
 ```
+
 ```
  There might be a problem with the project dependency tree.
  It is likely not a bug in Create React App, but something you need to fix locally.
